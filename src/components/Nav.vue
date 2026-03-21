@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue"
+import { ref, onMounted, onUnmounted, computed } from "vue"
 import { useRouter } from "vue-router"
 import { onAuthStateChanged, signOut } from "firebase/auth"
 import { auth } from "../api/firebase"
@@ -8,6 +8,10 @@ const router = useRouter()
 const currentUser = ref(null)
 
 let unsubscribe = null
+
+const logoRoute = computed(() => {
+  return currentUser.value ? "/create-project" : "/"
+})
 
 onMounted(() => {
   unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -26,15 +30,15 @@ const logout = async () => {
     await signOut(auth)
     router.push("/")
   } catch (error) {
-    console.error("Logout failed:", error.message)
+    console.error("Logout failed:", error)
   }
 }
 </script>
 
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark taskmate-navbar shadow-sm">
-    <div class="container">
-      <router-link to="/" class="navbar-brand d-flex align-items-center gap-2 fw-bold">
+  <nav class="taskmate-navbar">
+    <div class="container taskmate-navbar-inner">
+      <router-link :to="logoRoute" class="taskmate-brand">
         <img
           src="/taskmate-logo.png"
           alt="TaskMate logo"
@@ -43,62 +47,30 @@ const logout = async () => {
         <span>TaskMate</span>
       </router-link>
 
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#taskmateNav"
-        aria-controls="taskmateNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <div class="taskmate-nav-links">
+        <router-link to="/" class="taskmate-link">
+          Home
+        </router-link>
 
-      <div id="taskmateNav" class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
-          <li class="nav-item">
-            <router-link to="/" class="nav-link">Home</router-link>
-          </li>
+        <router-link v-if="currentUser" to="/projects" class="taskmate-link">
+          My Projects
+        </router-link>
 
-          <li v-if="currentUser" class="nav-item">
-            <router-link to="/projects" class="nav-link">Projects</router-link>
-          </li>
+        <router-link v-if="currentUser" to="/settings" class="taskmate-link">
+          Settings
+        </router-link>
 
-          <li v-if="currentUser" class="nav-item">
-            <router-link to="/settings" class="nav-link">Settings</router-link>
-          </li>
+        <router-link v-if="!currentUser" to="/login" class="taskmate-auth-btn taskmate-login-btn">
+          Login
+        </router-link>
 
-          <li class="nav-item">
-            <router-link to="/about" class="nav-link">About</router-link>
-          </li>
+        <router-link v-if="!currentUser" to="/register" class="taskmate-auth-btn taskmate-register-btn">
+          Register
+        </router-link>
 
-          <template v-if="!currentUser">
-            <li class="nav-item ms-lg-2">
-              <router-link to="/login" class="btn btn-light btn-sm me-lg-2 mb-2 mb-lg-0">
-                Login
-              </router-link>
-            </li>
-
-            <li class="nav-item">
-              <router-link to="/register" class="btn btn-success btn-sm">
-                Register
-              </router-link>
-            </li>
-          </template>
-
-          <template v-else>
-            <li class="nav-item me-lg-3 text-white small">
-              {{ currentUser.email }}
-            </li>
-
-            <li class="nav-item">
-              <button class="btn btn-light btn-sm" @click="logout">
-                Logout
-              </button>
-            </li>
-          </template>
-        </ul>
+        <button v-if="currentUser" class="taskmate-logout-btn" @click="logout">
+          Logout
+        </button>
       </div>
     </div>
   </nav>
@@ -106,17 +78,111 @@ const logout = async () => {
 
 <style scoped>
 .taskmate-navbar {
+  width: 100%;
   background: linear-gradient(90deg, #0d6efd, #198754);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.taskmate-navbar-inner {
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.taskmate-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.taskmate-brand:hover {
+  color: #ffffff;
 }
 
 .taskmate-logo {
-  width: 80px;
-  height: 80px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
+  display: block;
 }
 
-.nav-link.router-link-active {
-  font-weight: 700;
-  color: #ffffff !important;
+.taskmate-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.taskmate-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.taskmate-link:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.taskmate-auth-btn,
+.taskmate-logout-btn {
+  border: none;
+  text-decoration: none;
+  padding: 0.5rem 0.95rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.taskmate-login-btn {
+  background: #ffffff;
+  color: #212529;
+}
+
+.taskmate-login-btn:hover {
+  background: #f1f3f5;
+  color: #212529;
+}
+
+.taskmate-register-btn {
+  background: #198754;
+  color: #ffffff;
+}
+
+.taskmate-register-btn:hover {
+  background: #157347;
+  color: #ffffff;
+}
+
+.taskmate-logout-btn {
+  background: #ffffff;
+  color: #212529;
+}
+
+.taskmate-logout-btn:hover {
+  background: #f1f3f5;
+}
+
+@media (max-width: 768px) {
+  .taskmate-navbar-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.85rem;
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+  }
+
+  .taskmate-nav-links {
+    flex-wrap: wrap;
+  }
+
+  .taskmate-brand {
+    font-size: 1.5rem;
+  }
 }
 </style>

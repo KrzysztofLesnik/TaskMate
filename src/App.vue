@@ -1,29 +1,28 @@
 <script setup>
 import Nav from "./components/Nav.vue"
+import GlobalChat from "./components/GlobalChat.vue"
 </script>
 
 <template>
-  <div class="taskmate-app-shell">
+  <div class="app-wrapper">
     <Nav />
 
-    <main class="taskmate-main">
+    <main class="main-content">
       <router-view />
     </main>
+
+    <GlobalChat />
   </div>
 </template>
 
 <style scoped>
-.taskmate-app-shell {
+.app-wrapper {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.taskmate-main {
+.main-content {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1rem;
 }
 </style>

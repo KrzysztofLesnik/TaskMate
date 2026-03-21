@@ -6,6 +6,7 @@ import Home from "../pages/Home.vue"
 import Login from "../pages/Login.vue"
 import Register from "../pages/Register.vue"
 import Projects from "../pages/Projects.vue"
+import CreateProject from "../pages/CreateProject.vue"
 import Tasks from "../pages/Tasks.vue"
 import Settings from "../pages/Settings.vue"
 import About from "../pages/About.vue"
@@ -39,7 +40,6 @@ const routes = [
     beforeEnter: async (to, from, next) => {
       try {
         const user = await getCurrentUser()
-
         if (user) {
           next("/")
         } else {
@@ -58,7 +58,6 @@ const routes = [
     beforeEnter: async (to, from, next) => {
       try {
         const user = await getCurrentUser()
-
         if (user) {
           next("/")
         } else {
@@ -74,6 +73,12 @@ const routes = [
     path: "/projects",
     name: "projects",
     component: Projects,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/create-project",
+    name: "create-project",
+    component: CreateProject,
     meta: { requiresAuth: true }
   },
   {
@@ -104,7 +109,6 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.requiresAuth) {
     try {
       const user = await getCurrentUser()
-
       if (user) {
         next()
       } else {

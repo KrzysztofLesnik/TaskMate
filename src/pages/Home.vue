@@ -1,24 +1,31 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue"
+import { ref, onMounted, onUnmounted, computed } from "vue"
+import { useRouter } from "vue-router"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth } from "../api/firebase"
+
+const router = useRouter()
 
 const welcomeMessage = ref("")
 const currentUser = ref(null)
 
-let unsubscribe = null
+let unsubscribeAuth = null
+
+const logoRoute = computed(() => {
+  return currentUser.value ? "/create-project" : "/"
+})
 
 onMounted(() => {
   welcomeMessage.value = "Helping You Stay on Track"
 
-  unsubscribe = onAuthStateChanged(auth, (user) => {
+  unsubscribeAuth = onAuthStateChanged(auth, (user) => {
     currentUser.value = user
   })
 })
 
 onUnmounted(() => {
-  if (unsubscribe) {
-    unsubscribe()
+  if (unsubscribeAuth) {
+    unsubscribeAuth()
   }
 })
 </script>
@@ -28,11 +35,13 @@ onUnmounted(() => {
     <div class="taskmate-card-md">
       <div class="card yellow-sticker-card p-4 p-md-5 text-center">
         <div class="mb-2">
-          <img
-            src="/taskmate-logo.png"
-            alt="TaskMate logo"
-            class="home-logo img-fluid"
-          />
+          <router-link :to="logoRoute" class="home-logo-link">
+            <img
+              src="/taskmate-logo.png"
+              alt="TaskMate logo"
+              class="home-logo img-fluid"
+            />
+          </router-link>
         </div>
 
         <p class="lead text-dark mb-4">
@@ -66,11 +75,16 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.home-logo-link {
+  display: inline-block;
+}
+
 .home-logo {
   width: 600px;
   max-width: 90%;
   height: auto;
   display: block;
   margin: 0 auto;
+  cursor: pointer;
 }
 </style>
