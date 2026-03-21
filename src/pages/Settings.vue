@@ -1,95 +1,79 @@
-<template>
-  <div class="container mt-4">
+<script setup>
+import { ref, onMounted, onUnmounted } from "vue"
+import { useRouter } from "vue-router"
+import { onAuthStateChanged, signOut } from "firebase/auth"
+import { auth } from "../api/firebase"
 
-    <h2 class="text-center mb-4">User Settings</h2>
+const router = useRouter()
 
-    <div class="card shadow">
-      <div class="card-body">
+const currentUser = ref(null)
+const loading = ref(true)
 
-        <form @submit.prevent="updateProfile">
+let unsubscribe = null
 
-          <!-- Full Name -->
-          <div class="mb-3">
-            <label class="form-label">Full Name</label>
-            <input
-              type="text"
-              class="form-control"
-              v-model="fullName"
-            />
-          </div>
+onMounted(() => {
+  unsubscribe = onAuthStateChanged(auth, (user) => {
+    currentUser.value = user
+    loading.value = false
+  })
+})
 
-          <!-- Email -->
-          <div class="mb-3">
-            <label class="form-label">Email Address</label>
-            <input
-              type="email"
-              class="form-control"
-              v-model="email"
-            />
-          </div>
+onUnmounted(() => {
+  if (unsubscribe) {
+    unsubscribe()
+  }
+})
 
-          <!-- Password -->
-          <div class="mb-3">
-            <label class="form-label">New Password</label>
-            <input
-              type="password"
-              class="form-control"
-              v-model="password"
-            />
-          </div>
-
-          <!-- Theme (simple demo setting) -->
-          <div class="mb-3">
-            <label class="form-label">Theme</label>
-            <select class="form-select" v-model="theme">
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-          </div>
-
-          <!-- Messages -->
-          <div v-if="successMessage" class="alert alert-success">
-            {{ successMessage }}
-          </div>
-
-          <!-- Save Button -->
-          <div class="d-grid">
-            <button class="btn btn-primary btn-lg">
-              Save Changes
-            </button>
-          </div>
-
-        </form>
-
-      </div>
-    </div>
-
-  </div>
-</template>
-
-<script>
-export default {
-  name: "Settings",
-  data() {
-    return {
-      fullName: "Demo User",
-      email: "test@taskmate.com",
-      password: "",
-      theme: "light",
-      successMessage: ""
-    }
-  },
-  methods: {
-    updateProfile() {
-      this.successMessage = "Profile updated successfully!"
-      this.password = ""
-    }
+const logout = async () => {
+  try {
+    await signOut(auth)
+    router.push("/login")
+  } catch (error) {
+    console.error("Logout failed:", error.message)
   }
 }
 </script>
 
-<style scoped>
-h2 {
-  font-weight: bold;
-}
-</style>
+<template>
+  <section class="taskmate-page container">
+    <div class="taskmate-card-md">
+      <div class="card yellow-sticker-card p-4 p-md-5">
+        <h1 class="fw-bold mb-4">Settings</h1>
+
+        <div v-if="loading" class="text-muted">
+          Loading account information...
+        </div>
+
+        <div v-else class="card p-4">
+          <h5 class="fw-bold mb-3">Account Information</h5>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Email address</label>
+            <input
+              type="text"
+              class="form-control"
+              :value="currentUser?.email || ''"
+              readonly
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">User ID</label>
+            <input
+              type="text"
+              class="form-control"
+              :value="currentUser?.uid || ''"
+              readonly
+            />
+          </div>
+
+          <div class="d-flex justify-content-start">
+            <button class="btn btn-danger" @click="logout">
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>

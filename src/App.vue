@@ -1,41 +1,29 @@
+<script setup>
+import Nav from "./components/Nav.vue"
+</script>
+
 <template>
-  <div>
-    <!-- Navigation bar shown on all pages -->
+  <div class="taskmate-app-shell">
     <Nav />
 
-    <!-- Main content rendered by Vue Router -->
-    <div class="container-fluid mt-4">
+    <main class="taskmate-main">
       <router-view />
-    </div>
+    </main>
   </div>
 </template>
 
-<script>
-import Nav from './components/Nav.vue'
-
-export default {
-  name: 'App',
-  components: {
-    Nav
-  }
-}
-</script>
-
-<style>
-/* Global styling for TaskMate */
-
-body {
-  background-color: #f8f9fa;
-  font-family: Arial, Helvetica, sans-serif;
-  margin: 0;
-  padding: 0;
+<style scoped>
+.taskmate-app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-h1, h2, h3, h4 {
-  font-weight: bold;
-}
-
-.container-fluid {
-  padding-bottom: 40px;
+.taskmate-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
 }
 </style>

@@ -1,60 +1,35 @@
 <template>
-  <div class="container mt-4">
+  <section class="taskmate-page container">
+    <div class="taskmate-card-md">
+      <div class="card yellow-sticker-card p-4 p-md-5 text-center">
+        <div class="mb-4">
+          <img
+            src="/taskmate-logo.png"
+            alt="TaskMate logo"
+            class="about-logo img-fluid"
+          />
+        </div>
 
-    <div class="card shadow">
-      <div class="card-body text-center">
+        <h1 class="display-6 fw-bold mb-3">About TaskMate</h1>
 
-        <img
-          src="@/assets/taskmate-logo.png"
-          alt="TaskMate Logo"
-          width="100"
-          class="mb-3"
-        />
-
-        <h2>About TaskMate</h2>
-        <p class="text-muted fs-5">
-          Helping You Stay on Track
+        <p class="lead text-dark mb-3">
+          TaskMate is a task and project management web application built with Vue 3,
+          Vue Router, Bootstrap, and Firebase.
         </p>
 
-        <hr />
-
-        <p>
-          TaskMate is a task and project management application designed to help
-          users organise their work efficiently. It allows you to create projects,
-          add tasks, break tasks into steps, and track progress visually.
+        <p class="mb-0">
+          It is designed to help users organise projects, manage tasks, and track
+          progress in a simple and clear way.
         </p>
-
-        <p>
-          This application was developed as part of the CT216 coursework project.
-          It demonstrates:
-        </p>
-
-        <ul class="list-group mb-3">
-          <li class="list-group-item">Vue.js Routing</li>
-          <li class="list-group-item">JavaScript Objects and Arrays</li>
-          <li class="list-group-item">Functions and Event Handling</li>
-          <li class="list-group-item">Bootstrap UI Design</li>
-          <li class="list-group-item">Dynamic UI Updates</li>
-        </ul>
-
-        <p class="mt-3">
-          Version: 1.0.0
-        </p>
-
       </div>
     </div>
-
-  </div>
+  </section>
 </template>
 
-<script>
-export default {
-  name: "About"
-}
-</script>
-
 <style scoped>
-h2 {
-  font-weight: bold;
+.about-logo {
+  max-width: 280px;
+  width: 100%;
+  height: auto;
 }
 </style>

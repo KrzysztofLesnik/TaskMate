@@ -1,160 +1,131 @@
-<template>
-  <div class="container mt-5">
-    <div class="row justify-content-center">
-      <div class="col-md-6">
+<script setup>
+import { ref } from "vue"
+import { useRouter } from "vue-router"
+import { createUserWithEmailAndPassword } from "firebase/auth"
+import { auth } from "../api/firebase"
 
-        <div class="card shadow">
-          <div class="card-body">
+const router = useRouter()
 
-            <h2 class="text-center mb-4">Create a TaskMate Account</h2>
+const email = ref("")
+const password = ref("")
+const confirmPassword = ref("")
+const errorMessage = ref("")
+const successMessage = ref("")
+const loading = ref(false)
 
-            <form @submit.prevent="registerUser">
+const register = async () => {
+  errorMessage.value = ""
+  successMessage.value = ""
 
-              <!-- Full Name -->
-              <div class="mb-3">
-                <label class="form-label">Full Name</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  v-model="fullName"
-                  required
-                  placeholder="Enter your full name"
-                />
-              </div>
+  if (!email.value.trim()) {
+    errorMessage.value = "Email address is required."
+    return
+  }
 
-              <!-- Email -->
-              <div class="mb-3">
-                <label class="form-label">Email address</label>
-                <input
-                  type="email"
-                  class="form-control"
-                  v-model="email"
-                  required
-                  placeholder="Enter your email"
-                />
-              </div>
+  if (password.value !== confirmPassword.value) {
+    errorMessage.value = "Passwords do not match."
+    return
+  }
 
-              <!-- Password -->
-              <div class="mb-3">
-                <label class="form-label">Password</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  v-model="password"
-                  required
-                  placeholder="Enter your password"
-                />
-              </div>
+  if (password.value.length < 6) {
+    errorMessage.value = "Password must be at least 6 characters long."
+    return
+  }
 
-              <!-- Confirm Password -->
-              <div class="mb-3">
-                <label class="form-label">Confirm Password</label>
-                <input
-                  type="password"
-                  class="form-control"
-                  v-model="confirmPassword"
-                  required
-                  placeholder="Confirm your password"
-                />
-              </div>
+  loading.value = true
 
-              <!-- Error / Success Messages -->
-              <div v-if="errorMessage" class="alert alert-danger">
-                {{ errorMessage }}
-              </div>
-
-              <div v-if="successMessage" class="alert alert-success">
-                {{ successMessage }}
-              </div>
-
-              <!-- Register Button -->
-              <div class="d-grid">
-                <button type="submit" class="btn btn-success btn-lg">
-                  Register
-                </button>
-              </div>
-
-            </form>
-
-            <div class="text-center mt-3">
-              <p>
-                Already have an account?
-                <router-link to="/login">Login here</router-link>
-              </p>
-            </div>
-
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</template>
-
-<script>
-export default {
-  name: "Register",
-  data() {
-    return {
-      fullName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      errorMessage: "",
-      successMessage: ""
+  try {
+    await createUserWithEmailAndPassword(auth, email.value, password.value)
+    successMessage.value = "Registration successful."
+    router.push("/")
+  } catch (error) {
+    switch (error.code) {
+      case "auth/email-already-in-use":
+        errorMessage.value = "This email is already in use."
+        break
+      case "auth/invalid-email":
+        errorMessage.value = "Please enter a valid email address."
+        break
+      case "auth/weak-password":
+        errorMessage.value = "Password is too weak."
+        break
+      default:
+        errorMessage.value = "Registration failed. Please try again."
     }
-  },
-  methods: {
-    registerUser() {
-      // Clear previous messages
-      this.errorMessage = ""
-      this.successMessage = ""
-
-      // Basic validation
-      if (
-        this.fullName === "" ||
-        this.email === "" ||
-        this.password === "" ||
-        this.confirmPassword === ""
-      ) {
-        this.errorMessage = "All fields are required."
-        return
-      }
-
-      if (this.password !== this.confirmPassword) {
-        this.errorMessage = "Passwords do not match."
-        return
-      }
-
-      if (this.password.length < 4) {
-        this.errorMessage = "Password must be at least 4 characters long."
-        return
-      }
-
-      // Demo success (no backend yet)
-      this.successMessage = "Registration successful! You can now log in."
-
-      // Clear form
-      this.fullName = ""
-      this.email = ""
-      this.password = ""
-      this.confirmPassword = ""
-
-      // Redirect to login after short delay
-      setTimeout(() => {
-        this.$router.push("/login")
-      }, 1500)
-    }
+  } finally {
+    loading.value = false
   }
 }
 </script>
 
-<style scoped>
-.card {
-  border-radius: 10px;
-}
+<template>
+  <section class="taskmate-page container">
+    <div class="taskmate-card-sm">
+      <div class="card yellow-sticker-card p-4 p-md-5">
+        <h1 class="text-center fw-bold mb-4">Create Account</h1>
 
-h2 {
-  font-weight: bold;
-}
-</style>
+        <form @submit.prevent="register">
+          <div class="mb-3">
+            <label for="registerEmail" class="form-label">Email address</label>
+            <input
+              id="registerEmail"
+              v-model="email"
+              type="email"
+              class="form-control"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="registerPassword" class="form-label">Password</label>
+            <input
+              id="registerPassword"
+              v-model="password"
+              type="password"
+              class="form-control"
+              placeholder="Create a password"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Confirm password</label>
+            <input
+              id="confirmPassword"
+              v-model="confirmPassword"
+              type="password"
+              class="form-control"
+              placeholder="Confirm your password"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <div v-if="errorMessage" class="alert alert-danger" role="alert">
+            {{ errorMessage }}
+          </div>
+
+          <div v-if="successMessage" class="alert alert-success" role="alert">
+            {{ successMessage }}
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-success w-100"
+            :disabled="loading"
+          >
+            {{ loading ? "Creating account..." : "Register" }}
+          </button>
+        </form>
+
+        <p class="text-center mt-4 mb-0">
+          Already have an account?
+          <router-link to="/login">Login here</router-link>
+        </p>
+      </div>
+    </div>
+  </section>
+</template>

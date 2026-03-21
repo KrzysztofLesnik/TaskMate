@@ -1,85 +1,76 @@
-<template>
-  <div class="home-wrapper">
+<script setup>
+import { ref, onMounted, onUnmounted } from "vue"
+import { onAuthStateChanged } from "firebase/auth"
+import { auth } from "../api/firebase"
 
-    <div class="buttons-container">
-      <!-- Sticky Note Button -->
-      <router-link to="/projects" class="sticky-note">
-        Create / View Projects
-      </router-link>
+const welcomeMessage = ref("")
+const currentUser = ref(null)
 
-      <!-- Normal button -->
-      <router-link to="/about" class="btn about-btn">
-        About TaskMate
-      </router-link>
-    </div>
+let unsubscribe = null
 
-  </div>
-</template>
+onMounted(() => {
+  welcomeMessage.value = "Helping You Stay on Track"
 
-<script>
-export default {
-  name: "Home"
-}
+  unsubscribe = onAuthStateChanged(auth, (user) => {
+    currentUser.value = user
+  })
+})
+
+onUnmounted(() => {
+  if (unsubscribe) {
+    unsubscribe()
+  }
+})
 </script>
 
+<template>
+  <section class="taskmate-page container">
+    <div class="taskmate-card-md">
+      <div class="card yellow-sticker-card p-4 p-md-5 text-center">
+        <div class="mb-2">
+          <img
+            src="/taskmate-logo.png"
+            alt="TaskMate logo"
+            class="home-logo img-fluid"
+          />
+        </div>
+
+        <p class="lead text-dark mb-4">
+          {{ welcomeMessage }}
+        </p>
+
+        <div class="d-flex flex-column flex-md-row justify-content-center gap-3">
+          <template v-if="!currentUser">
+            <router-link to="/register" class="btn btn-success btn-lg px-4">
+              Get Started
+            </router-link>
+
+            <router-link to="/login" class="btn btn-primary btn-lg px-4">
+              Login
+            </router-link>
+          </template>
+
+          <template v-else>
+            <router-link to="/projects" class="btn btn-success btn-lg px-4">
+              My Projects
+            </router-link>
+
+            <router-link to="/settings" class="btn btn-primary btn-lg px-4">
+              Settings
+            </router-link>
+          </template>
+        </div>
+      </div>
+    </div>
+  </section>
+</template>
+
 <style scoped>
-.home-wrapper {
-  height: calc(100vh - 170px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.buttons-container {
-  width: 100%;
-  max-width: 500px;
-  display: grid;
-  gap: 25px;
-}
-
-/* Sticky note – 4x taller */
-.sticky-note {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: #ffeb3b;
-  color: #333;
-  font-size: 1.4rem;
-  font-weight: 700;
-  padding: 80px 20px;   /* makes it much taller */
-  border-radius: 8px;
-  text-decoration: none;
-  box-shadow: 6px 10px 18px rgba(0, 0, 0, 0.25);
-  transform: rotate(-1deg);
-  transition: 0.2s ease;
-  position: relative;
-  text-align: center;
-}
-
-/* Sticky tape look */
-.sticky-note::before {
-  content: "";
-  position: absolute;
-  top: 10px;
-  left: 50%;
-  width: 70px;
-  height: 14px;
-  background: rgba(255, 255, 255, 0.7);
-  transform: translateX(-50%);
-  border-radius: 4px;
-}
-
-.sticky-note:hover {
-  transform: rotate(0deg) scale(1.03);
-  box-shadow: 8px 14px 22px rgba(0, 0, 0, 0.35);
-}
-
-/* About button */
-.about-btn {
-  background-color: #6c757d;
-  color: white;
-  padding: 14px;
-  font-size: 1.1rem;
-  border-radius: 10px;
+.home-logo {
+  width: 600px;
+  max-width: 90%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
 }
 </style>

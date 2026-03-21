@@ -1,25 +1,14 @@
-import { createApp } from 'vue'
-import App from './App.vue'
+import { createApp } from "vue"
+import App from "./App.vue"
+import router from "./router/routes"
 
-// Vue Router
-import { createRouter, createWebHistory } from 'vue-router'
-import routes from './router/routes'
+import "bootstrap/dist/css/bootstrap.min.css"
+import "bootstrap"
 
-// Bootstrap
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap'
+import "./style.css"
 
-// Create the router
-const router = createRouter({
-  history: createWebHistory(),
-  routes: routes
-})
-
-// Create the Vue application
 const app = createApp(App)
 
-// Use router inside Vue
 app.use(router)
 
-// Mount the app to index.html
-app.mount('#app')
+app.mount("#app")

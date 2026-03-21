@@ -1,46 +1,122 @@
-// src/router/routes.js
+import { createRouter, createWebHistory } from "vue-router"
+import { onAuthStateChanged } from "firebase/auth"
+import { auth } from "../api/firebase"
 
-function loadPage(page) {
-  return () => import(`@/pages/${page}.vue`)
+import Home from "../pages/Home.vue"
+import Login from "../pages/Login.vue"
+import Register from "../pages/Register.vue"
+import Projects from "../pages/Projects.vue"
+import Tasks from "../pages/Tasks.vue"
+import Settings from "../pages/Settings.vue"
+import About from "../pages/About.vue"
+
+function getCurrentUser() {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (user) => {
+        unsubscribe()
+        resolve(user)
+      },
+      (error) => {
+        unsubscribe()
+        reject(error)
+      }
+    )
+  })
 }
 
 const routes = [
   {
-    path: '/',
-    name: 'Home',
-    component: loadPage('Home')
+    path: "/",
+    name: "home",
+    component: Home
   },
   {
-    path: '/login',
-    name: 'Login',
-    component: loadPage('Login')
+    path: "/login",
+    name: "login",
+    component: Login,
+    beforeEnter: async (to, from, next) => {
+      try {
+        const user = await getCurrentUser()
+
+        if (user) {
+          next("/")
+        } else {
+          next()
+        }
+      } catch (error) {
+        console.error("Login route guard error:", error)
+        next()
+      }
+    }
   },
   {
-    path: '/register',
-    name: 'Register',
-    component: loadPage('Register')
+    path: "/register",
+    name: "register",
+    component: Register,
+    beforeEnter: async (to, from, next) => {
+      try {
+        const user = await getCurrentUser()
+
+        if (user) {
+          next("/")
+        } else {
+          next()
+        }
+      } catch (error) {
+        console.error("Register route guard error:", error)
+        next()
+      }
+    }
   },
   {
-    path: '/projects',
-    name: 'Projects',
-    component: loadPage('Projects')
+    path: "/projects",
+    name: "projects",
+    component: Projects,
+    meta: { requiresAuth: true }
   },
   {
-    path: '/tasks/:projectId',
-    name: 'Tasks',
-    component: loadPage('Tasks'),
-    props: true
+    path: "/tasks/:id",
+    name: "tasks",
+    component: Tasks,
+    meta: { requiresAuth: true }
   },
   {
-    path: '/settings',
-    name: 'Settings',
-    component: loadPage('Settings')
+    path: "/settings",
+    name: "settings",
+    component: Settings,
+    meta: { requiresAuth: true }
   },
   {
-    path: '/about',
-    name: 'About',
-    component: loadPage('About')
+    path: "/about",
+    name: "about",
+    component: About
   }
 ]
 
-export default routes
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
+
+router.beforeEach(async (to, from, next) => {
+  if (to.meta.requiresAuth) {
+    try {
+      const user = await getCurrentUser()
+
+      if (user) {
+        next()
+      } else {
+        next("/login")
+      }
+    } catch (error) {
+      console.error("Protected route guard error:", error)
+      next("/login")
+    }
+  } else {
+    next()
+  }
+})
+
+export default router
